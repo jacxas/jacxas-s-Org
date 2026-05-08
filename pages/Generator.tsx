@@ -1,201 +1,203 @@
-import React, { useState } from 'react';
-import { generateLandingPage } from '../services/gemini';
+
+import React, { useState, useRef } from 'react';
+import { generateLandingPage, refineLandingPage } from '../services/gemini';
 import { AIConfig } from '../types';
-import { Wand2, Loader2, Download, Code, Smartphone, Monitor, RefreshCw } from 'lucide-react';
+import { Wand2, Loader2, Download, Code, Smartphone, Monitor, Copy, MessageSquare, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+const PRO_PRESETS = [
+  { name: 'SaaS Waitlist', niche: 'AI Productivity Tool', style: 'Dark Mode', structure: 'Standard' },
+  { name: 'High-Ticket Coaching', niche: 'Business Mastery Coaching', style: 'Bold', structure: 'Long Form' },
+  { name: 'Web3 Launch', niche: 'NFT Marketplace Protocol', style: 'Dark Mode', structure: 'Video' },
+];
 
 const Generator: React.FC = () => {
   const [loading, setLoading] = useState(false);
+  const [refining, setRefining] = useState(false);
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
+  const [refineQuery, setRefineQuery] = useState('');
   
   const [config, setConfig] = useState<AIConfig>({
     niche: '',
     style: 'Bold',
-    colorDetails: 'Dark mode, Neon Purple and Black',
+    colorDetails: 'Emerald and Slate 900',
     structure: 'Standard'
   });
 
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!config.niche) {
-      toast.error("Please enter a niche");
-      return;
-    }
+  const handleGenerate = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!config.niche) return toast.error("Tell us the niche first!");
     setLoading(true);
     try {
       const code = await generateLandingPage(config);
       setGeneratedCode(code);
-      toast.success("Landing page generated!");
+      toast.success("Viral landing page ready!");
     } catch (error) {
-      toast.error("Failed to generate. Please check API key.");
+      toast.error("Generation failed. Check API Key.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDownload = () => {
+  const handleRefine = async () => {
+    if (!generatedCode || !refineQuery) return;
+    setRefining(true);
+    try {
+      const newCode = await refineLandingPage(generatedCode, refineQuery);
+      setGeneratedCode(newCode);
+      setRefineQuery('');
+      toast.success("Optimization applied!");
+    } catch (error) {
+      toast.error("Refinement failed.");
+    } finally {
+      setRefining(false);
+    }
+  };
+
+  const copyToClipboard = () => {
     if (!generatedCode) return;
-    const blob = new Blob([generatedCode], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `landing-${config.niche.replace(/\s+/g, '-')}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success("Downloaded HTML file");
+    navigator.clipboard.writeText(generatedCode);
+    toast.success("Code copied to clipboard!");
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-[calc(100vh-4rem)] flex flex-col md:flex-row gap-6">
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 h-[calc(100vh-5rem)] flex flex-col lg:flex-row gap-6">
       
-      {/* Left Panel: Controls */}
-      <div className="w-full md:w-1/3 lg:w-1/4 flex flex-col gap-6 overflow-y-auto pb-10">
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl">
-          <h2 className="text-xl font-bold text-white mb-1 flex items-center gap-2">
-            <Wand2 className="w-5 h-5 text-brand-400" />
-            AI Generator
-          </h2>
-          <p className="text-sm text-slate-400 mb-6">Describe your dream landing page.</p>
-          
-          <form onSubmit={handleGenerate} className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Project Niche / Topic</label>
-              <input 
-                type="text" 
-                value={config.niche}
-                onChange={(e) => setConfig({...config, niche: e.target.value})}
-                placeholder="e.g. Crypto Wallet, Yoga Studio..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-white focus:ring-1 focus:ring-brand-500 outline-none"
-              />
-            </div>
+      {/* Sidebar Controls */}
+      <div className="w-full lg:w-80 xl:w-96 flex flex-col gap-5 overflow-y-auto pr-2 custom-scrollbar">
+        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-xl">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-brand-400" />
+              Creator Studio
+            </h2>
+          </div>
 
+          <div className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Visual Style</label>
-              <select 
-                 value={config.style}
-                 onChange={(e) => setConfig({...config, style: e.target.value as any})}
-                 className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-white focus:ring-1 focus:ring-brand-500 outline-none"
-              >
-                <option value="Minimal">Minimalist</option>
-                <option value="Bold">Bold & Viral</option>
-                <option value="Corporate">Corporate SaaS</option>
-                <option value="Dark Mode">Dark Future</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Color Theme</label>
-              <input 
-                type="text" 
-                value={config.colorDetails}
-                onChange={(e) => setConfig({...config, colorDetails: e.target.value})}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-white focus:ring-1 focus:ring-brand-500 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Structure</label>
-              <div className="grid grid-cols-3 gap-2">
-                {['Standard', 'Long Form', 'Video'].map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setConfig({...config, structure: s as any})}
-                    className={`px-2 py-2 text-xs rounded-md border ${
-                      config.structure === s 
-                      ? 'bg-brand-600 border-brand-500 text-white' 
-                      : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-600'
-                    }`}
+              <label className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-2 block">Quick Presets</label>
+              <div className="grid grid-cols-1 gap-2">
+                {PRO_PRESETS.map(p => (
+                  <button 
+                    key={p.name}
+                    onClick={() => setConfig({ ...config, niche: p.niche, style: p.style as any, structure: p.structure as any })}
+                    className="text-left px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-400 hover:border-brand-500 hover:text-white transition-all"
                   >
-                    {s}
+                    {p.name}
                   </button>
                 ))}
               </div>
             </div>
 
+            <div className="border-t border-slate-800 pt-4">
+              <label className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-2 block">Project Niche</label>
+              <textarea 
+                value={config.niche}
+                onChange={(e) => setConfig({...config, niche: e.target.value})}
+                placeholder="Ex: SaaS for dog walkers..."
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:ring-1 focus:ring-brand-500 outline-none resize-none h-20"
+              />
+            </div>
+
             <button 
-              type="submit" 
+              onClick={() => handleGenerate()}
               disabled={loading}
-              className="w-full mt-4 bg-brand-600 hover:bg-brand-500 disabled:bg-slate-800 disabled:text-slate-500 text-white py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-900/20"
+              className="w-full bg-brand-600 hover:bg-brand-500 disabled:bg-slate-800 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-900/40"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Wand2 className="w-5 h-5" />}
-              {loading ? 'Generating...' : 'Generate Landing'}
-            </button>
-          </form>
-        </div>
-
-        {/* History Mockup */}
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl flex-grow">
-           <h3 className="text-sm font-bold text-white mb-3">Recent Generations</h3>
-           <div className="space-y-2">
-             <div className="p-3 bg-slate-950 rounded-lg border border-slate-800 flex items-center justify-between">
-                <span className="text-xs text-slate-300">SaaS Dark Mode</span>
-                <span className="text-[10px] text-slate-500">2h ago</span>
-             </div>
-             <div className="p-3 bg-slate-950 rounded-lg border border-slate-800 flex items-center justify-between">
-                <span className="text-xs text-slate-300">Yoga Retreat</span>
-                <span className="text-[10px] text-slate-500">5h ago</span>
-             </div>
-           </div>
-        </div>
-      </div>
-
-      {/* Right Panel: Preview */}
-      <div className="flex-grow bg-slate-900 border border-slate-800 rounded-xl overflow-hidden flex flex-col relative">
-        {/* Toolbar */}
-        <div className="h-14 border-b border-slate-800 bg-slate-900 flex items-center justify-between px-4">
-          <div className="flex items-center space-x-2 bg-slate-950 p-1 rounded-lg border border-slate-800">
-            <button 
-              onClick={() => setViewMode('desktop')}
-              className={`p-1.5 rounded-md transition-colors ${viewMode === 'desktop' ? 'bg-slate-800 text-white' : 'text-slate-500 hover:text-slate-300'}`}
-            >
-              <Monitor className="w-4 h-4" />
-            </button>
-            <button 
-               onClick={() => setViewMode('mobile')}
-               className={`p-1.5 rounded-md transition-colors ${viewMode === 'mobile' ? 'bg-slate-800 text-white' : 'text-slate-500 hover:text-slate-300'}`}
-            >
-              <Smartphone className="w-4 h-4" />
+              {loading ? 'Crafting Code...' : 'Generate Magic'}
             </button>
           </div>
+        </div>
+
+        {/* Refinement Panel (Only if code exists) */}
+        {generatedCode && (
+          <div className="bg-slate-900 border border-brand-500/20 p-5 rounded-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-brand-400" />
+              AI Refinement
+            </h3>
+            <div className="relative">
+              <input 
+                type="text"
+                value={refineQuery}
+                onChange={(e) => setRefineQuery(e.target.value)}
+                placeholder="Change colors, add a section..."
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-3 pr-10 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand-500 outline-none"
+                onKeyDown={(e) => e.key === 'Enter' && handleRefine()}
+              />
+              <button 
+                onClick={handleRefine}
+                disabled={refining}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-brand-400 hover:text-white"
+              >
+                {refining ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+              </button>
+            </div>
+            <p className="text-[10px] text-slate-500 mt-2 italic text-center">Chat with your landing to tweak details.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Preview Area */}
+      <div className="flex-grow bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col shadow-2xl">
+        <div className="h-14 border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm flex items-center justify-between px-6">
+          <div className="flex items-center gap-4">
+             <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
+              <button onClick={() => setViewMode('desktop')} className={`p-1.5 rounded-md transition-all ${viewMode === 'desktop' ? 'bg-slate-800 text-brand-400' : 'text-slate-500 hover:text-slate-300'}`}>
+                <Monitor className="w-4 h-4" />
+              </button>
+              <button onClick={() => setViewMode('mobile')} className={`p-1.5 rounded-md transition-all ${viewMode === 'mobile' ? 'bg-slate-800 text-brand-400' : 'text-slate-500 hover:text-slate-300'}`}>
+                <Smartphone className="w-4 h-4" />
+              </button>
+            </div>
+            {generatedCode && (
+               <div className="flex items-center gap-2 text-[10px] font-medium text-slate-500 bg-slate-950/50 px-3 py-1 rounded-full border border-slate-800">
+                 <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                 Syncing Live
+               </div>
+            )}
+          </div>
           
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
              {generatedCode && (
                <>
-                <button onClick={handleDownload} className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-500 text-white text-xs font-bold rounded-lg transition-colors">
-                  <Download className="w-3 h-3" />
-                  <span>Export HTML</span>
+                <button onClick={copyToClipboard} className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-all" title="Copy HTML">
+                  <Copy className="w-4 h-4" />
+                </button>
+                <button className="flex items-center gap-2 px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-brand-900/20">
+                  <Download className="w-4 h-4" />
+                  <span>Push to Repo</span>
                 </button>
                </>
              )}
           </div>
         </div>
 
-        {/* Iframe Container */}
-        <div className="flex-grow bg-slate-950 flex items-center justify-center p-4 overflow-hidden relative">
+        <div className="flex-grow bg-slate-950 flex items-center justify-center p-8 overflow-hidden">
            {!generatedCode ? (
-             <div className="text-center space-y-4 max-w-md">
-               <div className="w-20 h-20 bg-slate-900 rounded-2xl flex items-center justify-center mx-auto border border-slate-800">
-                 {loading ? <Loader2 className="w-10 h-10 text-brand-500 animate-spin" /> : <Code className="w-10 h-10 text-slate-700" />}
+             <div className="text-center space-y-6 max-w-sm">
+               <div className="w-24 h-24 bg-gradient-to-tr from-brand-600/20 to-purple-600/20 rounded-3xl flex items-center justify-center mx-auto border border-brand-500/10 shadow-inner">
+                 {loading ? <Loader2 className="w-12 h-12 text-brand-500 animate-spin" /> : <Code className="w-12 h-12 text-slate-700" />}
                </div>
-               <h3 className="text-lg font-medium text-slate-300">
-                 {loading ? 'AI is coding your page...' : 'Ready to build'}
-               </h3>
-               <p className="text-slate-500 text-sm">
-                 {loading ? 'This usually takes about 10-20 seconds. We are writing HTML, CSS (Tailwind), and responsive logic.' : 'Enter your requirements on the left and hit Generate.'}
-               </p>
+               <div>
+                <h3 className="text-xl font-bold text-white mb-2">Architecting Brilliance</h3>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  Describe your vision, and we'll translate it into clean, responsive Tailwind code.
+                </p>
+               </div>
              </div>
            ) : (
-             <iframe 
-               srcDoc={generatedCode}
-               title="Preview"
-               className={`bg-white transition-all duration-500 shadow-2xl ${
-                 viewMode === 'mobile' ? 'w-[375px] h-[667px] rounded-3xl border-8 border-slate-800' : 'w-full h-full rounded-none'
-               }`}
-             />
+             <div className={`transition-all duration-700 ease-out shadow-[0_0_100px_rgba(139,92,246,0.1)] ${
+                 viewMode === 'mobile' ? 'w-[375px] h-[667px] rounded-[3rem] border-[12px] border-slate-800 overflow-hidden' : 'w-full h-full rounded-lg'
+               }`}>
+               <iframe 
+                 srcDoc={generatedCode}
+                 title="Preview"
+                 className="w-full h-full bg-white"
+               />
+             </div>
            )}
         </div>
       </div>

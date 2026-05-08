@@ -1,54 +1,87 @@
+
 import React from 'react';
 import { Template } from '../types';
-import { Star, Download, Eye } from 'lucide-react';
+import { Star, Download, Eye, Zap, TrendingUp } from 'lucide-react';
 
 interface TemplateCardProps {
   template: Template;
 }
 
 const TemplateCard: React.FC<TemplateCardProps> = ({ template }) => {
+  // Mocking "Enterprise" metrics for the marketplace feel
+  const viralScore = Math.floor(Math.random() * 20) + 80;
+  const conversionRate = (Math.random() * (6.5 - 2.1) + 2.1).toFixed(1);
+
   return (
-    <div className="group bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-brand-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-500/10 flex flex-col">
+    <div className="group bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-brand-500/50 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(139,92,246,0.15)] flex flex-col">
       {/* Image Container */}
       <div className="relative aspect-[4/3] overflow-hidden bg-slate-800">
         <img 
           src={template.image} 
           alt={template.title} 
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
         />
-        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-4">
-          <button className="p-2 bg-white text-black rounded-full hover:bg-brand-400 transition-colors">
+        <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-sm flex items-center justify-center space-x-4">
+          <button className="p-3 bg-white text-slate-950 rounded-xl hover:bg-brand-400 transition-all transform hover:scale-110">
             <Eye className="w-5 h-5" />
           </button>
-          <button className="p-2 bg-brand-600 text-white rounded-full hover:bg-brand-500 transition-colors">
+          <button className="p-3 bg-brand-600 text-white rounded-xl hover:bg-brand-500 transition-all transform hover:scale-110 shadow-xl shadow-brand-900/40">
             <Download className="w-5 h-5" />
           </button>
         </div>
-        <div className="absolute top-3 left-3 bg-slate-900/90 backdrop-blur text-xs font-medium px-2.5 py-1 rounded-md border border-slate-700 text-slate-300">
-          {template.category}
+        
+        {/* Badges */}
+        <div className="absolute top-3 left-3 flex flex-col gap-2">
+          <div className="bg-slate-950/90 backdrop-blur text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md border border-slate-700 text-slate-300">
+            {template.category}
+          </div>
+          {template.sales > 1000 && (
+             <div className="bg-brand-600 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md shadow-lg">
+               Best Seller
+             </div>
+          )}
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-4 flex flex-col flex-grow">
+      <div className="p-5 flex flex-col flex-grow">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-semibold text-white truncate pr-2">{template.title}</h3>
-          <span className="text-brand-400 font-bold">${template.price}</span>
+          <h3 className="text-lg font-bold text-white group-hover:text-brand-400 transition-colors truncate pr-2">{template.title}</h3>
+          <span className="text-xl font-black text-white">${template.price}</span>
         </div>
-        <p className="text-sm text-slate-400 line-clamp-2 mb-4 flex-grow">
+        <p className="text-sm text-slate-400 line-clamp-2 mb-6 flex-grow leading-relaxed">
           {template.description}
         </p>
+
+        {/* Enterprise Metrics Section */}
+        <div className="grid grid-cols-2 gap-4 mb-6 pt-4 border-t border-slate-800">
+           <div className="flex flex-col">
+             <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-1">
+               <Zap className="w-3 h-3 text-amber-500" /> Viral Score
+             </span>
+             <span className="text-sm font-bold text-white">{viralScore}/100</span>
+           </div>
+           <div className="flex flex-col">
+             <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-1">
+               <TrendingUp className="w-3 h-3 text-green-500" /> Avg. Conv
+             </span>
+             <span className="text-sm font-bold text-white">{conversionRate}%</span>
+           </div>
+        </div>
         
-        <div className="flex items-center justify-between text-xs text-slate-500 pt-4 border-t border-slate-800 mt-auto">
-          <div className="flex items-center space-x-1">
-            <span className="text-slate-300">{template.author}</span>
+        <div className="flex items-center justify-between text-[11px] text-slate-500 pt-4 border-t border-slate-800 mt-auto">
+          <div className="flex items-center space-x-2">
+            <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[8px] font-black uppercase">
+              {template.author.substring(0, 2)}
+            </div>
+            <span className="text-slate-300 font-bold">{template.author}</span>
           </div>
-          <div className="flex items-center space-x-3">
-             <div className="flex items-center text-amber-400">
+          <div className="flex items-center space-x-3 font-bold">
+             <div className="flex items-center text-amber-500">
               <Star className="w-3 h-3 fill-current mr-1" />
               <span>{template.rating}</span>
             </div>
-            <span>{template.sales} sales</span>
+            <span className="uppercase tracking-widest text-[9px]">{template.sales} sold</span>
           </div>
         </div>
       </div>

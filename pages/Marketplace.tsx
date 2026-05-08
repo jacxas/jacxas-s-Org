@@ -3,6 +3,7 @@ import { Search, Filter, SlidersHorizontal } from 'lucide-react';
 import { MOCK_TEMPLATES, CATEGORY_DATA } from '../constants';
 import { TemplateCategory } from '../types';
 import TemplateCard from '../components/TemplateCard';
+import EmptyState from '../components/EmptyState';
 
 const Marketplace: React.FC = () => {
   const [search, setSearch] = useState('');
@@ -16,6 +17,11 @@ const Marketplace: React.FC = () => {
       return matchesSearch && matchesCategory;
     });
   }, [search, selectedCategory]);
+
+  const resetFilters = () => {
+    setSearch('');
+    setSelectedCategory('All');
+  };
 
   const categories = ['All', ...Object.values(TemplateCategory)];
 
@@ -71,11 +77,11 @@ const Marketplace: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="text-center py-20 bg-slate-900/30 rounded-2xl border border-slate-800 border-dashed">
-          <Filter className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white">No templates found</h3>
-          <p className="text-slate-500">Try adjusting your search or filters.</p>
-        </div>
+        <EmptyState 
+          title="No templates found"
+          description={`We couldn't find any templates matching "${search}" in the ${selectedCategory} category. Try refining your search terms or exploring other categories.`}
+          onReset={resetFilters}
+        />
       )}
     </div>
   );

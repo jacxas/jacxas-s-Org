@@ -1,246 +1,234 @@
+
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid, ComposedChart, Line } from 'recharts';
 import { REVENUE_DATA, PENDING_TEMPLATES, MOCK_TEMPLATES } from '../constants';
-import { DollarSign, TrendingUp, Package, Users, Settings, LogOut, Bell, Shield, CheckCircle, XCircle, AlertTriangle, Download, Heart } from 'lucide-react';
+import { DollarSign, TrendingUp, Package, Users, Settings, LogOut, Shield, CheckCircle, XCircle, AlertTriangle, Download, Heart, Activity } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import TemplateCard from '../components/TemplateCard';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
 
   if (!user) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <p className="text-slate-400">Please log in via the Navbar controls.</p>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
+        <Activity className="w-12 h-12 text-slate-700" />
+        <p className="text-slate-400">Please authenticate to access your enterprise dashboard.</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex flex-col md:flex-row gap-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="flex flex-col lg:flex-row gap-8">
         
-        {/* Sidebar */}
-        <div className="w-full md:w-64 flex-shrink-0 space-y-8">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+        {/* Profile Sidebar */}
+        <div className="w-full lg:w-72 flex-shrink-0 space-y-6">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
             <div className="flex flex-col items-center text-center mb-6">
-              <div className="w-20 h-20 rounded-full bg-brand-500 p-1 mb-3">
-                <img src={user.avatar} alt="User" className="w-full h-full rounded-full bg-slate-800" />
+              <div className="relative group">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-brand-600 to-purple-600 p-1 mb-4 shadow-lg">
+                  <img src={user.avatar} alt="User" className="w-full h-full rounded-full bg-slate-800 object-cover" />
+                </div>
+                <div className="absolute bottom-4 right-1 w-6 h-6 bg-green-500 border-4 border-slate-900 rounded-full"></div>
               </div>
-              <h3 className="font-bold text-white text-lg">{user.name}</h3>
-              <div className="flex items-center space-x-2 mt-1">
-                <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide ${
-                  user.role === 'admin' ? 'bg-red-500/20 text-red-400' :
-                  user.role === 'seller' ? 'bg-brand-500/20 text-brand-400' :
-                  'bg-blue-500/20 text-blue-400'
-                }`}>
-                  {user.role}
-                </span>
-              </div>
+              <h3 className="font-bold text-white text-xl">{user.name}</h3>
+              <span className={`mt-2 px-3 py-1 rounded-full text-[10px] uppercase font-black tracking-widest ${
+                user.role === 'admin' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                user.role === 'seller' ? 'bg-brand-500/20 text-brand-400 border border-brand-500/30' :
+                'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+              }`}>
+                {user.role} Account
+              </span>
             </div>
             
-            <div className="space-y-1 border-t border-slate-800 pt-4">
-               <button className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white bg-brand-600/10 border border-brand-600/20">
+            <nav className="space-y-1 pt-6 border-t border-slate-800">
+               <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold text-brand-400 bg-brand-500/10 border border-brand-500/20">
+                <Activity className="w-4 h-4" />
+                <span>Live Analytics</span>
+              </button>
+              <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
                 <Settings className="w-4 h-4" />
-                <span>Overview</span>
+                <span>Security Settings</span>
               </button>
-              <button className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+              <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-all mt-4">
                 <LogOut className="w-4 h-4" />
-                <span>Sign Out</span>
+                <span>Terminate Session</span>
               </button>
-            </div>
+            </nav>
           </div>
 
-          {/* Balance Card */}
-          <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-xl p-6">
-             <p className="text-slate-400 text-xs font-medium uppercase mb-1">Current Balance</p>
-             <h2 className="text-3xl font-bold text-white mb-4">${user.balance.toLocaleString()}</h2>
-             {user.role === 'seller' && (
-               <button className="w-full py-2 bg-white text-black text-sm font-bold rounded-lg hover:bg-slate-200 transition-colors">
-                 Withdraw Funds
-               </button>
-             )}
+          <div className="bg-gradient-to-br from-brand-900/40 to-slate-900 border border-brand-500/20 rounded-2xl p-6 shadow-2xl relative overflow-hidden group">
+             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+               <DollarSign className="w-12 h-12 text-brand-400" />
+             </div>
+             <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Vault Balance</p>
+             <h2 className="text-3xl font-black text-white mb-6 tracking-tight">${user.balance.toLocaleString()}</h2>
+             <button className="w-full py-3 bg-white text-slate-950 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-all shadow-lg">
+                Liquidate Funds
+             </button>
           </div>
         </div>
 
-        {/* Main Content Area */}
-        <div className="flex-grow">
-           {user.role === 'admin' && <AdminView />}
-           {user.role === 'seller' && <SellerView />}
-           {user.role === 'buyer' && <BuyerView />}
+        {/* Main Interface */}
+        <div className="flex-grow space-y-6">
+           {user.role === 'admin' && <AdminDashboard />}
+           {user.role === 'seller' && <SellerDashboard />}
+           {user.role === 'buyer' && <BuyerDashboard />}
         </div>
       </div>
     </div>
   );
 };
 
-// --- SUB VIEWS ---
-
-const AdminView: React.FC = () => {
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatsCard title="Total Revenue" value="$1.2M" change="+8%" icon={DollarSign} color="text-green-500" />
-        <StatsCard title="Active Users" value="45.2k" change="+120 today" icon={Users} color="text-blue-500" />
-        <StatsCard title="Pending Reviews" value={PENDING_TEMPLATES.length.toString()} change="High Priority" icon={AlertTriangle} color="text-amber-500" />
-      </div>
-
-      {/* Pending Approvals */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-        <div className="p-6 border-b border-slate-800 flex justify-between items-center">
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <Shield className="w-5 h-5 text-brand-400" />
-            Pending Approvals
-          </h3>
-          <span className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-full">{PENDING_TEMPLATES.length} items</span>
-        </div>
-        <div className="divide-y divide-slate-800">
-          {PENDING_TEMPLATES.map((template) => (
-            <div key={template.id} className="p-4 flex items-center gap-4 hover:bg-slate-800/30 transition-colors">
-              <img src={template.image} alt="" className="w-16 h-12 object-cover rounded-md bg-slate-800" />
-              <div className="flex-grow">
-                <h4 className="font-bold text-white text-sm">{template.title}</h4>
-                <p className="text-xs text-slate-400">by {template.author} • {template.category} • ${template.price}</p>
-              </div>
-              <div className="flex gap-2">
-                <button className="p-2 hover:bg-red-500/20 hover:text-red-400 rounded-lg transition-colors text-slate-500">
-                  <XCircle className="w-5 h-5" />
-                </button>
-                <button className="p-2 hover:bg-green-500/20 hover:text-green-400 rounded-lg transition-colors text-slate-500">
-                  <CheckCircle className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-         <h3 className="text-lg font-bold text-white mb-6">System Activity</h3>
-         <div className="h-64 w-full bg-slate-950/50 rounded-lg flex items-center justify-center border border-slate-800 border-dashed">
-             <p className="text-slate-500">Audit Log Visualization Placeholder</p>
-         </div>
-      </div>
+const AdminDashboard: React.FC = () => (
+  <div className="space-y-6">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <StatsWidget title="Platform Revenue" value="$4.82M" change="+12.4%" icon={DollarSign} color="text-green-500" />
+      <StatsWidget title="Node Operations" value="99.9%" change="Optimal" icon={Activity} color="text-brand-500" />
+      <StatsWidget title="Pending QC" value={PENDING_TEMPLATES.length.toString()} change="Urgent" icon={AlertTriangle} color="text-amber-500" />
     </div>
-  );
-};
 
-const SellerView: React.FC = () => {
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatsCard title="Net Revenue" value="$12,450" change="+12%" icon={DollarSign} color="text-green-500" />
-        <StatsCard title="Total Sales" value="1,240" change="+5 today" icon={Package} color="text-brand-500" />
-        <StatsCard title="Template Views" value="85.2k" change="+2.1%" icon={Users} color="text-blue-500" />
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+      <div className="px-6 py-5 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+        <h3 className="font-bold text-white flex items-center gap-2">
+          <Shield className="w-5 h-5 text-brand-400" />
+          Quality Control Queue
+        </h3>
       </div>
-
-      {/* Chart */}
-      <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl">
-        <h3 className="text-lg font-bold text-white mb-6">Performance</h3>
-        <div className="h-80 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={REVENUE_DATA}>
-              <defs>
-                <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="name" stroke="#475569" tick={{fontSize: 12}} />
-              <YAxis stroke="#475569" tick={{fontSize: 12}} />
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }}
-              />
-              <Area type="monotone" dataKey="value" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorVal)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      <div className="flex justify-between items-end">
-        <h3 className="text-xl font-bold text-white">My Templates</h3>
-        <button className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-sm font-bold rounded-lg transition-colors">
-          + Upload New
-        </button>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {MOCK_TEMPLATES.slice(0, 4).map((t) => (
-          <div key={t.id} className="flex gap-4 p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-brand-500/30 transition-colors group">
-            <img src={t.image} alt="" className="w-24 h-20 object-cover rounded-lg" />
+      <div className="divide-y divide-slate-800">
+        {PENDING_TEMPLATES.map((t) => (
+          <div key={t.id} className="p-5 flex items-center gap-5 hover:bg-slate-800/20 transition-all">
+            <img src={t.image} alt="" className="w-20 h-14 object-cover rounded-xl border border-slate-800 shadow-lg" />
             <div className="flex-grow">
-               <h4 className="font-bold text-white truncate">{t.title}</h4>
-               <p className="text-xs text-slate-400 mb-2">{t.sales} Sales • ${t.price}</p>
-               <div className="flex gap-2 text-xs">
-                 <button className="text-brand-400 hover:text-brand-300 font-medium">Edit</button>
-                 <button className="text-slate-500 hover:text-slate-300">Analytics</button>
-               </div>
+              <h4 className="font-bold text-white text-sm">{t.title}</h4>
+              <p className="text-xs text-slate-500 mt-1">Submission by <span className="text-brand-400">{t.author}</span> • High Tier Market</p>
+            </div>
+            <div className="flex gap-2">
+              <button className="p-2.5 bg-slate-800 hover:bg-red-500/20 hover:text-red-400 rounded-xl transition-all text-slate-500 border border-transparent hover:border-red-500/30">
+                <XCircle className="w-5 h-5" />
+              </button>
+              <button className="p-2.5 bg-brand-600/10 hover:bg-green-500/20 hover:text-green-400 rounded-xl transition-all text-brand-400 border border-brand-500/20 hover:border-green-500/30">
+                <CheckCircle className="w-5 h-5" />
+              </button>
             </div>
           </div>
         ))}
       </div>
     </div>
-  );
-};
+  </div>
+);
 
-const BuyerView: React.FC = () => {
-  const purchases = MOCK_TEMPLATES.slice(2, 5); // Mock purchases
+const SellerDashboard: React.FC = () => (
+  <div className="space-y-6">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <StatsWidget title="EBITDA" value="$18,240" change="+22%" icon={DollarSign} color="text-green-500" />
+      <StatsWidget title="Conversion Rate" value="4.8%" change="+0.4%" icon={TrendingUp} color="text-brand-500" />
+      <StatsWidget title="Market Reach" value="124k" change="+5k" icon={Users} color="text-blue-500" />
+    </div>
 
+    <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+      <div className="flex justify-between items-center mb-8">
+        <h3 className="font-bold text-white flex items-center gap-2">
+          <Activity className="w-5 h-5 text-brand-400" />
+          Market Performance (LTM)
+        </h3>
+        <select className="bg-slate-950 border border-slate-800 rounded-lg text-xs px-3 py-1.5 text-slate-400 outline-none">
+          <option>Last 12 Months</option>
+          <option>Last 30 Days</option>
+        </select>
+      </div>
+      <div className="h-80 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart data={REVENUE_DATA}>
+            <XAxis dataKey="name" stroke="#475569" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 600}} dy={10} />
+            <YAxis stroke="#475569" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 600}} dx={-10} />
+            <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderRadius: '12px', border: '1px solid #334155', fontSize: '12px' }} />
+            <Area type="monotone" dataKey="value" fill="#8b5cf6" fillOpacity={0.05} stroke="none" />
+            <Bar dataKey="value" barSize={20} fill="#8b5cf6" radius={[4, 4, 0, 0]} opacity={0.3} />
+            <Line type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4, fill: '#8b5cf6', strokeWidth: 2, stroke: '#0f172a' }} />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+
+    <div className="flex justify-between items-center pt-4">
+      <h3 className="text-xl font-black text-white uppercase tracking-tight">Active Portfolio</h3>
+      <button className="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-brand-900/30">
+        Mint New Template
+      </button>
+    </div>
+    
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {MOCK_TEMPLATES.slice(0, 4).map((t) => (
+        <div key={t.id} className="flex gap-5 p-5 bg-slate-900 border border-slate-800 rounded-2xl hover:border-brand-500/40 transition-all group cursor-pointer shadow-lg">
+          <div className="relative">
+            <img src={t.image} alt="" className="w-24 h-20 object-cover rounded-xl" />
+            <div className="absolute top-1 left-1 bg-brand-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase">PRO</div>
+          </div>
+          <div className="flex-grow flex flex-col justify-between">
+             <div>
+               <h4 className="font-bold text-white text-sm group-hover:text-brand-400 transition-colors">{t.title}</h4>
+               <p className="text-[10px] text-slate-500 mt-1 uppercase font-bold tracking-widest">{t.sales} Unit Sales • ${t.price} MSRP</p>
+             </div>
+             <div className="flex gap-4 text-[10px] font-black uppercase tracking-widest text-slate-500">
+               <span className="hover:text-white transition-colors">Edit Code</span>
+               <span className="hover:text-white transition-colors">Insights</span>
+             </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const BuyerDashboard: React.FC = () => {
+  const purchases = MOCK_TEMPLATES.slice(1, 4);
   return (
     <div className="space-y-8">
-      
-      {/* Section: Purchased */}
       <div>
-        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-          <Package className="w-5 h-5 text-brand-400" />
-          My Library
+        <h2 className="text-xl font-black text-white uppercase tracking-tight mb-8 flex items-center gap-2">
+          <Package className="w-6 h-6 text-brand-400" />
+          Digital Assets
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
            {purchases.map((t) => (
-             <div key={t.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-               <div className="aspect-video bg-slate-800 relative">
-                 <img src={t.image} alt="" className="w-full h-full object-cover opacity-75" />
-                 <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/50">
-                    <button className="px-4 py-2 bg-white text-black rounded-lg font-bold text-sm flex items-center gap-2">
-                      <Download className="w-4 h-4" /> Download ZIP
+             <div key={t.id} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden group shadow-2xl">
+               <div className="aspect-video bg-slate-800 relative overflow-hidden">
+                 <img src={t.image} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80" />
+                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-slate-950/80 backdrop-blur-sm">
+                    <button className="px-6 py-3 bg-white text-slate-950 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-2xl transform translate-y-4 group-hover:translate-y-0 transition-all">
+                      <Download className="w-4 h-4" /> Final ZIP
                     </button>
                  </div>
                </div>
-               <div className="p-4">
+               <div className="p-5">
                  <h3 className="font-bold text-white text-sm mb-1">{t.title}</h3>
-                 <p className="text-xs text-slate-400">Purchased on Mar 12, 2024</p>
+                 <div className="flex justify-between items-center mt-4">
+                    <span className="text-[9px] text-slate-500 uppercase font-bold tracking-widest">v4.2.1 Latest</span>
+                    <span className="text-[9px] text-green-400 font-bold px-2 py-0.5 bg-green-500/10 rounded-md">Verified</span>
+                 </div>
                </div>
              </div>
            ))}
         </div>
       </div>
-
-      {/* Section: Wishlist */}
-      <div>
-        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-          <Heart className="w-5 h-5 text-red-400" />
-          Wishlist
-        </h2>
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center">
-           <p className="text-slate-400">Your wishlist is empty.</p>
-           <button className="mt-4 px-4 py-2 border border-slate-700 rounded-lg text-sm hover:bg-slate-800 text-slate-300">
-             Browse Marketplace
-           </button>
-        </div>
-      </div>
-
     </div>
   );
 };
 
-const StatsCard: React.FC<{ title: string; value: string; change: string; icon: any; color: string }> = ({ title, value, change, icon: Icon, color }) => (
-  <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl">
-    <div className="flex items-center justify-between mb-2">
-      <h3 className="text-slate-400 text-sm font-medium">{title}</h3>
-      <Icon className={`w-4 h-4 ${color}`} />
+const StatsWidget: React.FC<{ title: string; value: string; change: string; icon: any; color: string }> = ({ title, value, change, icon: Icon, color }) => (
+  <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl relative overflow-hidden">
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">{title}</h3>
+      <div className={`${color} bg-current/10 p-2 rounded-lg`}>
+        <Icon className="w-4 h-4" />
+      </div>
     </div>
-    <p className="text-2xl font-bold text-white">{value}</p>
-    <span className="text-xs text-slate-500">{change}</span>
+    <p className="text-3xl font-black text-white tracking-tight">{value}</p>
+    <div className="flex items-center gap-1.5 mt-2">
+      <div className="h-1 w-1 rounded-full bg-green-500"></div>
+      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{change}</span>
+    </div>
   </div>
 );
 
