@@ -6,6 +6,7 @@ interface AuthContextType {
   user: User | null;
   login: (role: 'buyer' | 'seller' | 'admin') => void;
   logout: () => void;
+  updateProfile: (updates: Partial<Pick<User, 'name' | 'avatar'>>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -63,8 +64,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     toast('Logged out', { icon: '👋' });
   };
 
+  const updateProfile = (updates: Partial<Pick<User, 'name' | 'avatar'>>) => {
+    if (!user) return;
+    setUser({ ...user, ...updates });
+    toast.success('Profile updated successfully');
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

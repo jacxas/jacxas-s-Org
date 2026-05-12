@@ -35,6 +35,21 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template }) => {
           <div className="bg-slate-950/90 backdrop-blur text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md border border-slate-700 text-slate-300">
             {template.category}
           </div>
+          {(template.category === 'E-Commerce Dashboard' || 
+            template.category === 'Crypto & Investment' || 
+            template.category === 'SaaS Admin' || 
+            template.category === 'Marketing & Ads') && (
+            <div className="bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md shadow-lg flex items-center gap-1">
+              <Zap className="w-3 h-3 fill-current" />
+              High Demand
+            </div>
+          )}
+          {template.sales > 4000 && (
+            <div className="bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md shadow-lg flex items-center gap-1">
+              <Eye className="w-3 h-3" />
+              Interactive Proof
+            </div>
+          )}
           {template.sales > 1000 && (
              <div className="bg-brand-600 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md shadow-lg">
                Best Seller

@@ -1,11 +1,12 @@
 export enum TemplateCategory {
-  SAAS = 'SaaS',
-  AGENCY = 'Agency',
+  ECOM_DASHBOARD = 'E-Commerce Dashboard',
+  CRYPTO_DASHBOARD = 'Crypto & Investment',
+  ADMIN_SAAS = 'SaaS Admin',
+  MARKETING_DASHBOARD = 'Marketing & Ads',
+  MULTIPURPOSE = 'Multipurpose Admin',
+  AGENCY = 'Agency Landing',
   PORTFOLIO = 'Portfolio',
-  ECOM = 'E-Commerce',
-  VIRAL = 'Viral',
-  BLOGGER = 'Blogger',
-  APP = 'Mobile App'
+  MOBILE_APP = 'Mobile App'
 }
 
 export interface Template {
@@ -20,6 +21,7 @@ export interface Template {
   tags: string[];
   description: string;
   previewUrl?: string;
+  createdAt?: string;
 }
 
 export interface User {
@@ -37,7 +39,7 @@ export interface ChartData {
 
 export interface AIConfig {
   niche: string;
-  style: 'Minimal' | 'Bold' | 'Corporate' | 'Playful' | 'Dark Mode';
+  style: 'Minimal' | 'Bold' | 'Corporate' | 'Playful' | 'Dark Mode' | 'Futuristic';
   colorDetails: string;
-  structure: 'Standard' | 'Long Form' | 'Video Centric';
+  structure: 'Standard' | 'Long Form' | 'Video Centric' | 'Bento Dashboard';
 }
